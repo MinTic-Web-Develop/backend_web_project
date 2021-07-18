@@ -1,13 +1,14 @@
-import {Schema, model} from 'mongoose'
+import { Schema, model } from "mongoose";
 
-const productSchema = new Schema({
+const productSchema = new Schema(
+  {
     name: String,
-    category: String,
-    price: Number,
-    imgURL: String,
-},{
+    description: String,
+  },
+  {
     timestamps: true,
-    versionKey: false
-})
+    versionKey: false,
+  }
+);
 
-export default model('product', productSchema);
+module.exports = model("Product", productSchema);
