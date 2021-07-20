@@ -1,17 +1,43 @@
 const Category = require("../models/Category");
 
 const getCategories = async (req, res) => {
-  const categories = await Category.find();
-
+  const categories = await Category.find({node : false });
+  console.log('entro');
   if (!categories || categories.length < 1) {
     res.status(404).send({ message: "No se han encontrado categorias" });
   } else {
     res.status(200).send(categories);
   }
 };
+
+const getSubCategoriesByCategory = async (req, res) => {
+  const { categoryId } = req.params
+  const subcategories = await Category.find({node_id : categoryId });
+  res.status(200).send(subcategories);
+}
+
+const getAllCategories = async (req, res) => {
+  const categories = await Category.find({node: false});
+  const info = [];
+  await Promise.all(
+      categories.map(async (category)=>{
+          const subcategories = await Category.find({ node_id: category._id});
+          if( subcategories != ''){
+              const data = mapper.toCategory(category);
+              data.subcategories = subcategories;
+              info.push(data);
+          }
+          else{
+              info.push(category);
+          }
+      }),
+  );
+  res.status(200).send(info);
+}
+
 const getCategoryById = (req, res) => {
-  const params = req.params;
-  Category.findOne({ _id: params.id }, (err, category) => {
+  const { categoryId } = req.params;
+  Category.findOne({ _id: categoryId }, (err, category) => {
     if (err) {
       res.status(500).send({ messagen: "Error en el servidor" });
     } else {
@@ -25,28 +51,42 @@ const getCategoryById = (req, res) => {
 };
 
 const createCategory = (req, res) => {
-  const category = new Category();
-  const { name, active, imgUrl } = req.body;
-  category.name = name;
-  category.active = active;
-  category.imgUrl = imgUrl;
-  category.save((err, categoryStored) => {
-    if (err) {
-      res.status(500).send({ message: "La categoria ya existe" });
-    } else {
-      if (!categoryStored) {
-        res.status(500).send({ message: "Error al guardar la categoria" });
+
+  const { name, description, imgURL, active, node, node_id } = req.body;
+  if (node != false){
+    const category = new Category({ name , description, imgURL, active, node, node_id});
+    category.save((err, categoryStored) => {
+      if (err) {
+        res.status(500).send({ message: "La categoria ya existe" });
       } else {
-        res.status(200).send({ category: categoryStored });
+        if (!categoryStored) {
+          res.status(500).send({ message: "Error al guardar la categoria" });
+        } else {
+          res.status(200).send({ category: categoryStored });
+        }
       }
-    }
-  });
+    });
+  }
+  else{
+    const subcategory = new Category({ name , description, imgURL, active, node});
+    category.save((err, categoryStored) => {
+      if (err) {
+        res.status(500).send({ message: "La subcategoria ya existe" });
+      } else {
+        if (!categoryStored) {
+          res.status(500).send({ message: "Error al guardar la subcategoria" });
+        } else {
+          res.status(200).send({ category: categoryStored });
+        }
+      }
+    });
+  }
 };
 
-const deleteCategory = (req, res) => {
-  const params = req.params;
+const deleteCategoryById = (req, res) => {
+  const { categoryId } = req.params
 
-  Category.findByIdAndDelete({ _id: params.id }, (err) => {
+  Category.findByIdAndDelete({ _id: categoryId }, (err) => {
     if (err) {
       res.status(404).send({ message: "No se ha encontrado la categoria" });
     } else {
@@ -55,12 +95,12 @@ const deleteCategory = (req, res) => {
   });
 };
 
-const updateCategory = (req, res) => {
-  const params = req.params;
+const updateCategoryById = (req, res) => {
+  const { categoryId } = req.params
   const categoryData = req.body;
 
   Category.findByIdAndUpdate(
-    { _id: params.id },
+    { _id: categoryId },
     categoryData,
     (err, categoryUpdate) => {
       if (err) {
@@ -78,8 +118,10 @@ const updateCategory = (req, res) => {
 
 module.exports = {
   getCategories,
+  getAllCategories,
+  getSubCategoriesByCategory,
   createCategory,
-  deleteCategory,
-  updateCategory,
+  deleteCategoryById,
+  updateCategoryById,
   getCategoryById,
 };
