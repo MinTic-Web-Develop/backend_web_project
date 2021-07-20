@@ -1,45 +1,88 @@
 const Product = require("../models/Product");
 
-const createProduct = (req, res) => {
-  const product = new Product();
-  console.log(req.body);
-  const { name, description } = req.body;
-  product.name = name;
-  product.description = description;
+const createProduct = async (req, res) => {
+  const { name, description, category, price, imgURL, active, keywords, tax } = req.body
+  const product = await new Product({ name, description, category, price, imgURL, active, keywords, tax });
 
   product.save((err, productStored) => {
     if (err) {
-      res.status(500).send({ message: "El usuario ya existe" });
+      res.status(500).send({ message: "El producto ya existe" });
     } else {
-      if (!userStored) {
-        res.status(404).send({ message: "error al crear el usuariio" });
+      if (!productStored) {
+        res.status(404).send({ message: "error al crear el producto" });
       } else {
-        res.status(200).send({ user: userStored });
+        res.status(200).send({ message: "Producto creado con éxito" });
       }
     }
   });
 };
 
-const getProducts = (req, res) => {
-  console.log("productcos");
-  res.json("get products");
+const getProductsByCategory = async (req, res) => {
+  const { categoryId } = req.params
+  const products = await Product.find({ category: categoryId, active:true });
+  if (!products || products.length < 1) {
+    res.status(404).send({ message: "No se han encontrado productos en esa categoria" });
+  } else {
+    res.status(200).send(products);
+  }
 };
 
-const getProductById = (req, res) => {
-  res.json("get a specific product");
+const getProductById = async (req, res) => {
+  const { productId } = req.params
+  const product = await Product.find({ _id: productId });
+  if (!product || product.length < 1) {
+    res.status(404).send({ message: "No se ha encontrado el producto" });
+  } else {
+    res.status(200).send(product);
+  }
 };
 
-const updateProductById = (req, res) => {
-  res.json("update a specific product");
+const getProducts = async (req, res) => {
+  const products = await Product.find();
+  if (!products || products.length < 1) {
+    res.status(404).send({ message: "No se han encontrado productos" });
+  } else {
+    res.status(200).send(products);
+  }
+};
+
+const updateProductById = async (req, res) => {
+  const { productId } = req.params
+  const productData = req.body;
+
+  await Product.findByIdAndUpdate(
+    { _id: productId },
+    productData,
+    (err, productUpdate) => {
+      if (err) {
+        res.status(500).send({ message: "Error en el servidor" });
+      } else {
+        if (!productUpdate) {
+          res.status(404).send({ message: "No se encontro el producto" });
+        } else {
+          res.status(200).send({ message: "Producto actualizado" });
+        }
+      }
+    }
+  );
 };
 
 const deleteProductById = (req, res) => {
-  res.json("delete a specific product");
+  const { productId } = req.params
+
+  Category.findByIdAndDelete({ _id: productId }, (err) => {
+    if (err) {
+      res.status(404).send({ message: "No se ha encontrado el producto" });
+    } else {
+      res.status(200).send({ message: "Producto eliminado con éxito" });
+    }
+  });
 };
 
 module.exports = {
-  getProducts,
+  getProductsByCategory,
   getProductById,
+  getProducts,
   createProduct,
   updateProductById,
   deleteProductById,

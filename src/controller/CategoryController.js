@@ -1,3 +1,4 @@
+import mapper from '../mappers/category.mapper';
 const Category = require("../models/Category");
 
 const getCategories = async (req, res) => {
@@ -57,12 +58,12 @@ const createCategory = (req, res) => {
     const category = new Category({ name , description, imgURL, active, node, node_id});
     category.save((err, categoryStored) => {
       if (err) {
-        res.status(500).send({ message: "La categoria ya existe" });
+        res.status(500).send({ message: "La subcategoria ya existe" });
       } else {
         if (!categoryStored) {
-          res.status(500).send({ message: "Error al guardar la categoria" });
+          res.status(500).send({ message: "Error al guardar la subcategoria" });
         } else {
-          res.status(200).send({ category: categoryStored });
+          res.status(200).send({ message: "Subcategoria creada con éxito"});
         }
       }
     });
@@ -71,12 +72,12 @@ const createCategory = (req, res) => {
     const subcategory = new Category({ name , description, imgURL, active, node});
     category.save((err, categoryStored) => {
       if (err) {
-        res.status(500).send({ message: "La subcategoria ya existe" });
+        res.status(500).send({ message: "La categoria ya existe" });
       } else {
         if (!categoryStored) {
-          res.status(500).send({ message: "Error al guardar la subcategoria" });
+          res.status(500).send({ message: "Error al guardar la categoria" });
         } else {
-          res.status(200).send({ category: categoryStored });
+          res.status(200).send({ message: "Categoria creada con éxito"});
         }
       }
     });
