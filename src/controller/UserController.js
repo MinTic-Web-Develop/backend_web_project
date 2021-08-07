@@ -1,5 +1,4 @@
 const User = require('../models/User');
-const Role = require('../models/Role');
 const Location = require('../models/Location');
 
 
@@ -15,7 +14,7 @@ const getUsers = async (req, res) =>{
         }
     }
     else{
-        const users = await User.find().populate("roles", "name").populate("address").populate({ path: "address", populate: { path: "city", select: "name"}});;
+        const users = await User.find().populate("roles", "name").populate("address").populate({ path: "address", populate: { path: "city", select: "name"}});
         if (!users || users < 1){
             res.status(404).send({ message: "No se han encontrado usuarios" });
         }else{
