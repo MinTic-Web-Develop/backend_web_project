@@ -8,6 +8,7 @@ const departmentRouter = require('./api/departments.routes');
 const restaurantRouter = require('./api/restaurant.routes');
 const orderRouter = require('./api/order.routes');
 
+
 router.use('/user', userRouter);
 router.use('/auth', authRouter);
 router.use('/categories', categoryRouter);
@@ -16,5 +17,6 @@ router.use('/cities', cityRouter);
 router.use('/departments', departmentRouter);
 router.use('/restaurant', restaurantRouter);
 router.use('/shoppingcart', orderRouter);
+
 
 module.exports = router;
