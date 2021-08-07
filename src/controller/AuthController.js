@@ -36,25 +36,30 @@ const signup = async(req,res)=>{
 
 const signin = async(req,res)=>{
     const { email, password} = req.body
-
     const userFound = await User.findOne({email : email}).populate("roles", "name");
-    const matchPassword = await User.comparePassword(password, userFound.password);
-    if(!matchPassword || !userFound) return res.status(400).send({ token: null, message: "Usuario o contraseña invalida"});
-
-    const token = jwt.sign({id: userFound._id }, config.secrets.SECRET,{
-        expiresIn: 86400 //24 horas
-    });
-
-    res.status(200).send({
-        message: `Bienvenido ${userFound.name}`,
-        token: token,
-        user:{
-            id: userFound._id,
-            name: userFound.name,
-            email: userFound.email,
-            roles: userFound.roles
+    if (!userFound){
+        return res.status(400).send({ message: "Usuario no encontrado"});
+    }
+    else{
+        const matchPassword = await User.comparePassword(password, userFound.password);
+        if(!matchPassword){
+            return res.status(400).send({ token: null, message: "contraseña invalida"});
         }
-    });
+        const token = jwt.sign({id: userFound._id }, config.secrets.SECRET,{
+            expiresIn: 86400 //24 horas
+        });
+
+        res.status(200).send({
+            message: `Bienvenid@ ${userFound.name}`,
+            token: token,
+            user:{
+                id: userFound._id,
+                name: userFound.name,
+                email: userFound.email,
+                roles: userFound.roles
+            }
+        });
+    }
 }
 
 module.exports = {
