@@ -1,5 +1,5 @@
 const toCategory = ( CategoryObj ) => ({
-    id: CategoryObj._id,
+    _id: CategoryObj._id,
     name: CategoryObj.name,
     description: CategoryObj.description,
     imgURL: CategoryObj.imgURL,
